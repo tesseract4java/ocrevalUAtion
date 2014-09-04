@@ -18,13 +18,6 @@
 package eu.digitisation.log;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -32,55 +25,56 @@ import java.util.logging.Logger;
  */
 public class Messages {
 
-    private static final Logger logger = Logger.getLogger("ApplicationLog");
+    // private static final Logger logger = Logger.getLogger("ApplicationLog");
 
     static {
-        try {
-            URI uri = Messages.class.getProtectionDomain()
-                    .getCodeSource().getLocation().toURI();
-            String dir = new File(uri.getPath()).getParent();
-            File file = new File(dir, "ocrevaluation.log");
-
-            addFile(file);
-            Messages.info("Logfile is " + file);
-
-            // while debugging
-            if (java.awt.Desktop.isDesktopSupported()) {
-                addFrame();
-            }
-        } catch (SecurityException ex) {
-            Messages.info(Messages.class.getName() + ": " + ex);
-        } catch (URISyntaxException ex) {
-            Logger.getLogger(Messages.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        // try {
+        // URI uri = Messages.class.getProtectionDomain()
+        // .getCodeSource().getLocation().toURI();
+        // String dir = new File(uri.getPath()).getParent();
+        // File file = new File(dir, "ocrevaluation.log");
+        //
+        // addFile(file);
+        // Messages.info("Logfile is " + file);
+        //
+        // // while debugging
+        // if (java.awt.Desktop.isDesktopSupported()) {
+        // addFrame();
+        // }
+        // } catch (SecurityException ex) {
+        // Messages.info(Messages.class.getName() + ": " + ex);
+        // } catch (URISyntaxException ex) {
+        // Logger.getLogger(Messages.class.getName()).log(Level.SEVERE, null,
+        // ex);
+        // }
     }
 
     public static void addFile(File file) {
-        try {
-            FileHandler fh = new FileHandler(file.getAbsolutePath());
-            fh.setFormatter(new LogFormatter());
-            logger.addHandler(fh);
-        } catch (IOException ex) {
-            Messages.info(Messages.class.getName() + ": " + ex);
-        }
+        // try {
+        // FileHandler fh = new FileHandler(file.getAbsolutePath());
+        // fh.setFormatter(new LogFormatter());
+        // logger.addHandler(fh);
+        // } catch (IOException ex) {
+        // Messages.info(Messages.class.getName() + ": " + ex);
+        // }
     }
 
     public static void addFrame() {
         // Only while debugging
-        LogFrameHandler lfh = new LogFrameHandler();
-        lfh.setFormatter(new LogFormatter());
-        logger.addHandler(lfh);
+        // LogFrameHandler lfh = new LogFrameHandler();
+        // lfh.setFormatter(new LogFormatter());
+        // logger.addHandler(lfh);
     }
 
     public static void info(String s) {
-        logger.info(s);
+        // logger.info(s);
     }
 
     public static void warning(String s) {
-        logger.warning(s);
+        // logger.warning(s);
     }
 
     public static void severe(String s) {
-        logger.severe(s);
+        // logger.severe(s);
     }
 }
