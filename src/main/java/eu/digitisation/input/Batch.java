@@ -17,9 +17,13 @@
  */
 package eu.digitisation.input;
 
-import eu.digitisation.math.Pair;
 import java.io.File;
+import java.io.IOException;
 import java.io.InvalidObjectException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+
+import eu.digitisation.math.Pair;
 
 /**
  * A batch of file pairs to be processed. Files must be in two different folders
@@ -37,9 +41,12 @@ public class Batch {
 
     /**
      * Create a a batch of file pairs
-     * @param dir1 the first directory of files
-     * @param dir2 the second directory of files
-     * @throws InvalidObjectException 
+     * 
+     * @param dir1
+     *            the first directory of files
+     * @param dir2
+     *            the second directory of files
+     * @throws InvalidObjectException
      */
     public Batch(File dir1, File dir2) throws InvalidObjectException {
         if (dir1.isDirectory()) {
@@ -57,17 +64,43 @@ public class Batch {
             files2[0] = dir2;
         }
         if (files1.length != files2.length) {
-            throw new java.io.InvalidObjectException(dir1.getName() 
+            throw new java.io.InvalidObjectException(dir1.getName()
                     + " and " + dir2.getName()
                     + " contain a different number of files");
         } else {
             size = files1.length;
         }
         if (!consistent()) {
-            throw new java.io.InvalidObjectException(dir1.getName() 
+            throw new java.io.InvalidObjectException(dir1.getName()
                     + " and " + dir2.getName()
                     + " contain files with inconsistent names");
         }
+    }
+
+    /**
+     * 
+     * @param transcriptions
+     * @param ocrDir
+     * @throws IOException
+     * 
+     * @author Paul Vorbach
+     */
+    public Batch(Iterable<Path> transcriptions, Path ocrDir) throws IOException {
+        final ArrayList<File> fs1 = new ArrayList<>();
+        final ArrayList<File> fs2 = new ArrayList<>();
+
+        for (final Path transcription : transcriptions) {
+            fs1.add(transcription.toFile());
+            fs2.add(ocrDir.resolve(transcription.getFileName()).toFile());
+        }
+
+        size = fs1.size();
+
+        files1 = new File[size];
+        files2 = new File[size];
+
+        fs1.toArray(files1);
+        fs2.toArray(files2);
     }
 
     private boolean consistent() {
@@ -99,7 +132,8 @@ public class Batch {
 
     /**
      *
-     * @param n the file number
+     * @param n
+     *            the file number
      * @return the n-th File pair
      */
     public Pair<File, File> pair(int n) {
@@ -109,8 +143,10 @@ public class Batch {
     /**
      * Common prefix
      *
-     * @param s1 a string
-     * @param s2 another string
+     * @param s1
+     *            a string
+     * @param s2
+     *            another string
      * @return the common prefix of s1 and s2
      */
     static String prefix(String s1, String s2) {
@@ -126,7 +162,8 @@ public class Batch {
     /**
      * Longest common prefix
      *
-     * @param files an array of files
+     * @param files
+     *            an array of files
      * @return the longest common prefix to all filenames
      */
     private String lcp(File[] files) {
@@ -144,8 +181,10 @@ public class Batch {
     /**
      * Common suffix
      *
-     * @param s1 one word
-     * @param s2 another word
+     * @param s1
+     *            one word
+     * @param s2
+     *            another word
      * @return the common suffix to s1 and s2
      */
     static String suffix(String s1, String s2) {
@@ -153,7 +192,8 @@ public class Batch {
         int len = 0;
 
         while (len < limit
-                && s1.charAt(s1.length() - len - 1) == s2.charAt(s2.length() - len - 1)) {
+                && s1.charAt(s1.length() - len - 1) == s2.charAt(s2.length()
+                        - len - 1)) {
             ++len;
         }
         return s1.substring(s1.length() - len);
@@ -162,7 +202,8 @@ public class Batch {
     /**
      * Longest common suffix
      *
-     * @param files an array of files
+     * @param files
+     *            an array of files
      * @return the longest common suffix to all files
      */
     public static String lcs(File[] files) {
