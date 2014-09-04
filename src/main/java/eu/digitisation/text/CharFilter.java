@@ -29,7 +29,6 @@ import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * Transform text according to a mapping between (source, target) Unicode
  * character sequences. This can be useful, for example, to replace Unicode
@@ -42,7 +41,7 @@ import java.util.Map;
 public class CharFilter extends HashMap<String, String> {
 
     private static final long serialVersionUID = 1L;
-    boolean compatibility;  // Unicode compatibility mode
+    boolean compatibility; // Unicode compatibility mode
 
     /**
      * Default constructor
@@ -55,10 +54,12 @@ public class CharFilter extends HashMap<String, String> {
     /**
      * Default constructor
      *
-     * @param compatibility the Unicode compatibility mode (true means
-     * activated)
-     * @param file a CSV file with one transformation per line, each line
-     * contains two Unicode hex sequences (and comments) separated with commas
+     * @param compatibility
+     *            the Unicode compatibility mode (true means activated)
+     * @param file
+     *            a CSV file with one transformation per line, each line
+     *            contains two Unicode hex sequences (and comments) separated
+     *            with commas
      */
     public CharFilter(boolean compatibility, File file) {
         super();
@@ -69,8 +70,8 @@ public class CharFilter extends HashMap<String, String> {
     /**
      * Default constructor
      *
-     * @param compatibility the Unicode compatibility mode (true means
-     * activated)
+     * @param compatibility
+     *            the Unicode compatibility mode (true means activated)
      */
     public CharFilter(boolean compatibility) {
         super();
@@ -78,12 +79,25 @@ public class CharFilter extends HashMap<String, String> {
     }
 
     /**
+     * Constructor that inherits all entries of the given source map.
+     * 
+     * @param compatibility
+     * @param source
+     */
+    public CharFilter(boolean compatibility, Map<String, String> source) {
+        super(source.size());
+        this.compatibility = compatibility;
+        this.putAll(source);
+    }
+
+    /**
      * Load the transformation map from a CSV file: one transformation per line,
      * each line contains two Unicode hex sequences (and comments) separated
      * with commas
      *
-     * @param file the CSV file (or directory with CSV files) with the
-     * equivalent sequences
+     * @param file
+     *            the CSV file (or directory with CSV files) with the equivalent
+     *            sequences
      */
     public CharFilter(File file) {
         this.compatibility = false;
@@ -93,8 +107,9 @@ public class CharFilter extends HashMap<String, String> {
     /**
      * Add files to filter
      *
-     * @param file the CSV file (or directory with CSV files) with the
-     * equivalent sequences
+     * @param file
+     *            the CSV file (or directory with CSV files) with the equivalent
+     *            sequences
      */
     public final void addFilter(File file) {
         if (file.isDirectory()) {
@@ -110,7 +125,8 @@ public class CharFilter extends HashMap<String, String> {
     /**
      * Add the equivalences contained in a CSV file
      *
-     * @param file the CSV file
+     * @param file
+     *            the CSV file
      */
     private void addCSV(File file) {
         try {
@@ -118,7 +134,7 @@ public class CharFilter extends HashMap<String, String> {
             while (reader.ready()) {
                 String line = reader.readLine();
                 String[] tokens = line.split("([,;\t])");
-                if (tokens.length > 1) {  // allow comments in line
+                if (tokens.length > 1) { // allow comments in line
                     String key = UnicodeReader.codepointsToString(tokens[0]);
                     String value = UnicodeReader.codepointsToString(tokens[1]);
                     put(key, value);
@@ -129,38 +145,40 @@ public class CharFilter extends HashMap<String, String> {
             }
             reader.close();
         } catch (IOException ex) {
-            
+
         }
     }
 
     /**
      * Add the equivalences in CSV format
      *
-     * @param reader a BufferedReader with CSV lines
+     * @param reader
+     *            a BufferedReader with CSV lines
      */
     public void addCSV(BufferedReader reader) {
         try {
             while (reader.ready()) {
-                    String line = reader.readLine();
-                    String[] tokens = line.split("([,;\t])");
-                    if (tokens.length > 1) {  // allow comments in line
-                        String key = UnicodeReader.codepointsToString(tokens[0]);
-                        String value = UnicodeReader.codepointsToString(tokens[1]);
-                        put(key, value);
-                    } else {
-                        throw new IOException("Wrong CSV line" + line);
-                    }
+                String line = reader.readLine();
+                String[] tokens = line.split("([,;\t])");
+                if (tokens.length > 1) { // allow comments in line
+                    String key = UnicodeReader.codepointsToString(tokens[0]);
+                    String value = UnicodeReader.codepointsToString(tokens[1]);
+                    put(key, value);
+                } else {
+                    throw new IOException("Wrong CSV line" + line);
                 }
-                reader.close();
+            }
+            reader.close();
         } catch (IOException ex) {
             Messages.info(CharFilter.class.getName() + ": " + ex);
         }
     }
-    
+
     /**
      * Set the compatibility mode
      *
-     * @param compatibility the compatibility mode
+     * @param compatibility
+     *            the compatibility mode
      */
     public void setCompatibility(boolean compatibility) {
         this.compatibility = compatibility;
@@ -171,7 +189,8 @@ public class CharFilter extends HashMap<String, String> {
      * the replacement specified by the transformation map. Remark: No
      * replacement priority is guaranteed in case of overlapping matches.
      *
-     * @param s the string to be transformed
+     * @param s
+     *            the string to be transformed
      * @return a new string with all the transformations performed
      */
     public String translate(String s) {
@@ -187,15 +206,16 @@ public class CharFilter extends HashMap<String, String> {
     /**
      * Converts the contents of a file into a CharSequence
      *
-     * @param file the input file
+     * @param file
+     *            the input file
      * @return the file content as a CharSequence
      */
     public CharSequence toCharSequence(File file) {
-
         try {
             FileInputStream input = new FileInputStream(file);
             FileChannel channel = input.getChannel();
-            java.nio.ByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
+            java.nio.ByteBuffer buffer = channel.map(
+                    FileChannel.MapMode.READ_ONLY, 0, channel.size());
             return java.nio.charset.Charset.forName("utf-8").newDecoder()
                     .decode(buffer);
         } catch (IOException ex) {
@@ -207,8 +227,10 @@ public class CharFilter extends HashMap<String, String> {
     /**
      * Translate all characters according to the transformation map
      *
-     * @param infile the input file
-     * @param outfile the file where the output must be written
+     * @param infile
+     *            the input file
+     * @param outfile
+     *            the file where the output must be written
      */
     public void translate(File infile, File outfile) {
         try {
@@ -227,7 +249,8 @@ public class CharFilter extends HashMap<String, String> {
     /**
      * Translate (in place) all characters according to the transformation map
      *
-     * @param file the input file
+     * @param file
+     *            the input file
      *
      */
     public void translate(File file) {
