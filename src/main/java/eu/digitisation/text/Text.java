@@ -71,14 +71,16 @@ public class Text {
         }
     }
 
-   
     /**
      * Create TextContent from file
      *
-     * @param file the input file
-     * @param encoding the text encoding for text files (optional; can be null)
-     * @param filter XPAthFilter for XML files (extracts textual content from
-     * selected elements)
+     * @param file
+     *            the input file
+     * @param encoding
+     *            the text encoding for text files (optional; can be null)
+     * @param filter
+     *            XPAthFilter for XML files (extracts textual content from
+     *            selected elements)
      * @throws eu.digitisation.input.WarningException
      * @throws eu.digitisation.input.SchemaLocationException
      */
@@ -92,25 +94,25 @@ public class Text {
         try {
             FileType type = FileType.valueOf(file);
             switch (type) {
-                case PAGE:
-                    readPageFile(file);
-                    break;
-                case TEXT:
-                    readTextFile(file);
-                    break;
-                case FR10:
-                    readFR10File(file);
-                    break;
-                case HOCR:
-                    readHOCRFile(file);
-                    break;
-                case ALTO:
-                    readALTOFile(file);
-                    break;
-                default:
-                    throw new WarningException("Unsupported file format ("
-                            + type + " format) for file "
-                            + file.getName());
+            case PAGE:
+                readPageFile(file);
+                break;
+            case TEXT:
+                readTextFile(file);
+                break;
+            case FR10:
+                readFR10File(file);
+                break;
+            case HOCR:
+                readHOCRFile(file);
+                break;
+            case ALTO:
+                readALTOFile(file);
+                break;
+            default:
+                throw new WarningException("Unsupported file format ("
+                        + type + " format) for file "
+                        + file.getName());
             }
         } catch (eu.digitisation.input.SchemaLocationException ex) {
             throw ex;
@@ -123,12 +125,12 @@ public class Text {
     /**
      * Create Text from file
      *
-     * @param file the input file
+     * @param file
+     *            the input file
      * @throws eu.digitisation.input.WarningException
-<<<<<<< HEAD
+     *             <<<<<<< HEAD
      * @throws eu.digitisation.input.SchemaLocationException
-=======
->>>>>>> wip
+     *             ======= >>>>>>> wip
      */
     public Text(File file)
             throws WarningException, SchemaLocationException {
@@ -169,7 +171,8 @@ public class Text {
     /**
      * The content as a string
      *
-     * @param filter a CharFilter
+     * @param filter
+     *            a CharFilter
      * @return the text after the application of the filter
      */
     public String toString(CharFilter filter) {
@@ -182,7 +185,8 @@ public class Text {
      * Add content after normalization of whitespace and composition of
      * diacritics
      *
-     * @param s input text
+     * @param s
+     *            input text
      */
     private void add(String s) throws WarningException {
         String reduced = StringNormalizer.reduceWS(s);
@@ -200,12 +204,13 @@ public class Text {
     }
 
     private Document loadXMLFile(File file) {
-        Document doc = DocumentParser.parse(file);      
+        Document doc = DocumentParser.parse(file);
         String xmlEncoding = doc.getXmlEncoding();
 
         if (xmlEncoding != null) {
             encoding = Charset.forName(xmlEncoding);
-            Messages.info("XML file " + file.getName() + " encoding is " + encoding);
+            Messages.info("XML file " + file.getName() + " encoding is "
+                    + encoding);
         } else {
             if (encoding == null) {
                 encoding = Encoding.detect(file);
@@ -220,24 +225,31 @@ public class Text {
      * Read textual content and collapse whitespace: contiguous spaces are
      * considered a single one
      *
-     * @param file the input text file
+     * @param file
+     *            the input text file
      */
     private void readTextFile(File file) throws WarningException {
         // guess encoding if none is provided
         if (encoding == null) {
             encoding = Encoding.detect(file);
         }
-        Messages.info("Text file " + file.getName() + " encoding is " + encoding);
+        Messages.info("Text file " + file.getName() + " encoding is "
+                + encoding);
 
         // read content
         try {
             FileInputStream fis = new FileInputStream(file);
             InputStreamReader isr = new InputStreamReader(fis, encoding);
             BufferedReader reader = new BufferedReader(isr);
+            final StringBuilder completeText = new StringBuilder();
 
-            while (reader.ready()) {
-                add(reader.readLine().trim());
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                completeText.append(line.trim());
+                completeText.append('\n');
             }
+            add(completeText.toString());
+            reader.close();
         } catch (IOException ex) {
             Messages.info(Text.class.getName() + ": " + ex);
         }
@@ -246,9 +258,11 @@ public class Text {
     /**
      * Reads textual content in a PAGE element of type TextRegion
      *
-     * @param region the TextRegion element
+     * @param region
+     *            the TextRegion element
      */
-    private void readPageTextRegion(Element region) throws IOException, WarningException {
+    private void readPageTextRegion(Element region) throws IOException,
+            WarningException {
         NodeList nodes = region.getChildNodes();
         for (int n = 0; n < nodes.getLength(); ++n) {
             Node node = nodes.item(n);
@@ -263,11 +277,13 @@ public class Text {
      * Reads textual content in PAGE XML document. By default selects all
      * TextREgion elements
      *
-     * @param file the input XML file
+     * @param file
+     *            the input XML file
      */
     private void readPageFile(File file) throws IOException, WarningException {
         Document doc = loadXMLFile(file);
-        Document sorted = SortPageXML.isSorted(doc) ? doc : SortPageXML.sorted(doc);
+        Document sorted = SortPageXML.isSorted(doc) ? doc
+                : SortPageXML.sorted(doc);
         List<Element> regions = (filter == null)
                 ? new ElementList(sorted.getElementsByTagName("TextRegion"))
                 : filter.selectElements(sorted);
@@ -281,7 +297,8 @@ public class Text {
     /**
      * Reads textual content from FR10 XML paragraph
      *
-     * @param oar the paragraph (par) element
+     * @param oar
+     *            the paragraph (par) element
      */
     private void readFR10Par(Element par) throws WarningException {
         NodeList lines = par.getElementsByTagName("line");
@@ -309,7 +326,8 @@ public class Text {
     /**
      * Reads textual content from FR10 XML file
      *
-     * @param file the input XML file
+     * @param file
+     *            the input XML file
      */
     private void readFR10File(File file) throws WarningException {
         Document doc = loadXMLFile(file);
@@ -327,7 +345,8 @@ public class Text {
     /**
      * Reads textual content from HOCR HTML file
      *
-     * @param file the input HTML file
+     * @param file
+     *            the input HTML file
      */
     private void readHOCRFile(File file) throws WarningException {
         try {
@@ -344,8 +363,8 @@ public class Text {
                         + " encoding is " + encoding);
             }
 
-            for (org.jsoup.nodes.Element e
-                    : doc.body().select("*[class=ocr_line")) {
+            for (org.jsoup.nodes.Element e : doc.body().select(
+                    "*[class=ocr_line")) {
                 String text = e.text();
                 add(text);
 
@@ -358,7 +377,8 @@ public class Text {
     /**
      * Reads textual content in ALTO XML element of type TextLine
      *
-     * @param file the input ALTO file
+     * @param file
+     *            the input ALTO file
      */
     private void readALTOTextLine(Element line) throws WarningException {
         NodeList strings = line.getElementsByTagName("String");
@@ -374,7 +394,8 @@ public class Text {
     /**
      * Reads textual content from ALTO XML file
      *
-     * @param file the input ALTO file
+     * @param file
+     *            the input ALTO file
      */
     private void readALTOFile(File file) throws WarningException {
         Document doc = loadXMLFile(file);
@@ -391,7 +412,8 @@ public class Text {
      *
      * @throws java.io.IOException
      */
-    public static void main(String[] args) throws IOException, WarningException, XPathExpressionException, SchemaLocationException {
+    public static void main(String[] args) throws IOException,
+            WarningException, XPathExpressionException, SchemaLocationException {
         if (args.length < 1 | args[0].equals("-h")) {
             System.err.println("usage: Text xmlfile [xpathfile] [xpathfile]");
         } else {

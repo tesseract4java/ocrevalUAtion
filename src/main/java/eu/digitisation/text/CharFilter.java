@@ -164,6 +164,7 @@ public class CharFilter extends HashMap<String, String> {
                     String key = UnicodeReader.codepointsToString(tokens[0]);
                     String value = UnicodeReader.codepointsToString(tokens[1]);
                     put(key, value);
+                    System.out.println(key + ", " + value);
                 } else {
                     throw new IOException("Wrong CSV line" + line);
                 }

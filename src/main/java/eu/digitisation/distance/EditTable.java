@@ -29,9 +29,9 @@ package eu.digitisation.distance;
  */
 public class EditTable {
 
-    int width;     // table width = max i-value (exclusive)
-    int height;    // table height = max j-value (exclusive)
-    byte[] bytes;  // table content
+    int width; // table width = max i-value (exclusive)
+    int height; // table height = max j-value (exclusive)
+    byte[] bytes; // table content
 
     /**
      * Create an EditTable with width rows and height columns
@@ -48,15 +48,17 @@ public class EditTable {
                     + ((width % 4) * (height % 4)) + 1; // ceiling
             this.width = width;
             this.height = height;
-            bytes = new byte[len];  // two bits per operation 
+            bytes = new byte[len]; // two bits per operation
         }
     }
 
     /**
      * Get a specific bit in a byte
      *
-     * @param b a byte
-     * @param position the bit position
+     * @param b
+     *            a byte
+     * @param position
+     *            the bit position
      * @return the byte with that bit set to the specified value
      */
     private static boolean getBit(byte b, int position) {
@@ -66,9 +68,12 @@ public class EditTable {
     /**
      * Return a new byte with one bit set to a specific value
      *
-     * @param b a byte
-     * @param position the bit position
-     * @param value the value for that bit
+     * @param b
+     *            a byte
+     * @param position
+     *            the bit position
+     * @param value
+     *            the value for that bit
      * @return a new byte with that bit set to the specified value
      */
     private static byte setBit(byte b, int position, boolean value) {
@@ -82,7 +87,8 @@ public class EditTable {
     /**
      * Get the bit at that position in the byte array
      *
-     * @param position a position in the array
+     * @param position
+     *            a position in the array
      * @return the bit at that position in the byte array
      */
     private boolean getBit(int position) {
@@ -92,7 +98,8 @@ public class EditTable {
     /**
      * Set the bit at that position in the byte array to the specified value
      *
-     * @param position a position in the array
+     * @param position
+     *            a position in the array
      */
     private void setBit(int position, boolean value) {
         bytes[position / 8] = setBit(bytes[position / 8], position % 8, value);
@@ -100,8 +107,10 @@ public class EditTable {
 
     /**
      *
-     * @param i x-coordinate
-     * @param j y-coordinate
+     * @param i
+     *            x-coordinate
+     * @param j
+     *            y-coordinate
      * @return the edit operation stored at cell (i,j)
      * @throws IllegalArgumentException
      */
@@ -109,13 +118,13 @@ public class EditTable {
         int bytenum = (i / 4) * height + (i % 4) * (height / 4) + (j / 4)
                 + ((i % 4) * (height % 4) + (j % 4)) / 4;
         int offset = (2 * ((i % 8) * (height % 8) + (j % 8))) % 8;
-//        int position = 2 * (i * height + j);
+        // int position = 2 * (i * height + j);
 
         try {
             boolean low = getBit(bytes[bytenum], offset);
-            //boolean low = getBit(position);
+            // boolean low = getBit(position);
             boolean high = getBit(bytes[bytenum], offset + 1);
-            //boolean high = getBit(position + 1);
+            // boolean high = getBit(position + 1);
             if (low) {
                 if (high) {
                     return EdOp.SUBSTITUTE;
@@ -139,45 +148,48 @@ public class EditTable {
     /**
      * Store an edit operation at cell (i, j)
      *
-     * @param i x-coordinate
-     * @param j y-coordinate
-     * @param op the edit operation to be stored
+     * @param i
+     *            x-coordinate
+     * @param j
+     *            y-coordinate
+     * @param op
+     *            the edit operation to be stored
      */
     public void set(int i, int j, EdOp op) {
-        //int position = 2 * (i * height + j);
+        // int position = 2 * (i * height + j);
         int bytenum = (i / 4) * height + (i % 4) * (height / 4) + (j / 4)
                 + ((i % 4) * (height % 4) + (j % 4)) / 4;
         int offset = (2 * ((i % 8) * (height % 8) + (j % 8))) % 8;
-        
+
         boolean low;
         boolean high;
 
         switch (op) {
-            case SUBSTITUTE:
-                low = true;
-                high = true;
-                break;
-            case DELETE:
-                low = true;
-                high = false;
-                break;
-            case INSERT:
-                low = false;
-                high = true;
-                break;
-            case KEEP:
-                low = false;
-                high = false;
-                break;
-            default:
-                low = false;
-                high = false;
+        case SUBSTITUTE:
+            low = true;
+            high = true;
+            break;
+        case DELETE:
+            low = true;
+            high = false;
+            break;
+        case INSERT:
+            low = false;
+            high = true;
+            break;
+        case KEEP:
+            low = false;
+            high = false;
+            break;
+        default:
+            low = false;
+            high = false;
         }
         try {
             bytes[bytenum] = setBit(bytes[bytenum], offset, low);
-            //setBit(position, low);
+            // setBit(position, low);
             bytes[bytenum] = setBit(bytes[bytenum], offset + 1, high);
-            //setBit(position + 1, high);
+            // setBit(position + 1, high);
         } catch (ArrayIndexOutOfBoundsException ex) {
             throw new IllegalArgumentException("Forbiden acces to "
                     + "cell (" + i + "," + j
@@ -197,18 +209,18 @@ public class EditTable {
             for (int j = 0; j < height; ++j) {
                 EdOp e = get(i, j);
                 switch (e) {
-                    case KEEP:
-                        builder.append('K');
-                        break;
-                    case SUBSTITUTE:
-                        builder.append('S');
-                        break;
-                    case INSERT:
-                        builder.append('I');
-                        break;
-                    case DELETE:
-                        builder.append('D');
-                        break;
+                case KEEP:
+                    builder.append('K');
+                    break;
+                case SUBSTITUTE:
+                    builder.append('S');
+                    break;
+                case INSERT:
+                    builder.append('I');
+                    break;
+                case DELETE:
+                    builder.append('D');
+                    break;
                 }
             }
             builder.append("\n ");
@@ -221,10 +233,12 @@ public class EditTable {
      * Build the sequence of edit operations in the path from a the cell at
      * (row, column) to the cell at (0,0)
      *
-     * @param row the starting row
-     * @param column the starting column
+     * @param row
+     *            the starting row
+     * @param column
+     *            the starting column
      * @return the sequence of edit operations stored in this table which lead
-     * from the cell at (row, column) to the cell at (0,0)
+     *         from the cell at (row, column) to the cell at (0,0)
      */
     private EditSequence path(int row, int column) {
         EditSequence operations = new EditSequence(Math.max(row, column));
@@ -234,16 +248,16 @@ public class EditTable {
         while (i > 0 || j > 0) {
             EdOp e = get(i, j);
             switch (e) {
-                case INSERT:
-                    --j;
-                    break;
-                case DELETE:
-                    --i;
-                    break;
-                default:
-                    --i;
-                    --j;
-                    break;
+            case INSERT:
+                --j;
+                break;
+            case DELETE:
+                --i;
+                break;
+            default:
+                --i;
+                --j;
+                break;
             }
             operations.add(e);
         }
@@ -255,7 +269,7 @@ public class EditTable {
      * (width, height) to the cell at (0,0)
      *
      * @return the sequence of edit operations stored in this table which lead
-     * from the cell at (width - 1, height - 1) to the cell at (0,0)
+     *         from the cell at (width - 1, height - 1) to the cell at (0,0)
      * @depecated Use new EditSequence(EditTeble) instead
      */
     public EditSequence path() {

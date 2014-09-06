@@ -34,7 +34,10 @@ import eu.digitisation.text.StringNormalizer;
 import eu.digitisation.text.Text;
 import eu.digitisation.text.WordSet;
 import eu.digitisation.xml.DocumentBuilder;
+
 import java.io.File;
+import java.nio.file.Paths;
+
 import org.w3c.dom.Element;
 
 /**
@@ -62,7 +65,8 @@ public class Report extends DocumentBuilder {
     /**
      * Insert a table at the end of the document body
      *
-     * @param content the table content
+     * @param content
+     *            the table content
      * @return the table element
      */
     private Element addTable(Element parent, String[][] content) {
@@ -79,12 +83,14 @@ public class Report extends DocumentBuilder {
 
     /**
      *
-     * @param batch a batch of file pairs
-     * @param pars input parameters
+     * @param batch
+     *            a batch of file pairs
+     * @param pars
+     *            input parameters
      * @throws eu.digitisation.input.WarningException
      * @throws eu.digitisation.input.SchemaLocationException
      */
-    public Report(Batch batch, Parameters pars) 
+    public Report(Batch batch, Parameters pars)
             throws WarningException, SchemaLocationException {
         super("html");
         init();
@@ -92,11 +98,20 @@ public class Report extends DocumentBuilder {
         File swfile = pars.swfile.getValue();
         EdOpWeight w = new OcrOpWeight(pars);
         CharStatTable stats = new CharStatTable();
-        CharFilter filter = new CharFilter(pars.compatibility.getValue());
+        CharFilter filter;
+
+        // optional eqfile
+        if (pars.compatibility.getValue() != null) {
+            filter = new CharFilter(pars.compatibility.getValue(),
+                    pars.eqfile.getValue());
+        } else {
+            filter = new CharFilter(pars.compatibility.getValue());
+        }
+
         Element summaryTab;
-        int numwords = 0;   // number of words in GT
-        int wdist = 0;      // word distances
-        int bdist = 0;      // bag-of-words distanbces
+        int numwords = 0; // number of words in GT
+        int wdist = 0; // word distances
+        int bdist = 0; // bag-of-words distanbces
 
         addTextElement(body, "h2", "General results");
         summaryTab = addElement(body, "div");
@@ -107,13 +122,15 @@ public class Report extends DocumentBuilder {
             Messages.info("Processing " + input.first.getName());
             Text gt = new Text(input.first);
             Text ocr = new Text(input.second);
-            String gtref = pars.ignoreDiacritics.getValue() // remove spurious marks
-                    ? gt.toString(filter).replaceAll(" \\p{InCombiningDiacriticalMarks}+", " ")
+            String gtref = pars.ignoreDiacritics.getValue() // remove spurious
+                                                            // marks
+            ? gt.toString(filter).replaceAll(
+                    " \\p{InCombiningDiacriticalMarks}+", " ")
                     : gt.toString(filter);
             String ocrref = pars.ignoreDiacritics.getValue()
                     ? ocr.toString(filter) // remove spurious marks
                     .replaceAll(" \\p{InCombiningDiacriticalMarks}+", " ")
-                    :ocr.toString(filter);
+                    : ocr.toString(filter);
             String gts = StringNormalizer.canonical(gtref,
                     pars.ignoreCase.getValue(),
                     pars.ignoreDiacritics.getValue(),
@@ -129,23 +146,25 @@ public class Report extends DocumentBuilder {
                     input.second.getName(), gtref, ocrref, w, eds);
             int[] wd = (swfile == null)
                     ? EditDistance.wordDistance(gts, ocrs, 1000)
-                    : EditDistance.wordDistance(gts, ocrs, new WordSet(swfile), 1000);
+                    : EditDistance.wordDistance(gts, ocrs, new WordSet(swfile),
+                            1000);
 
             stats.add(eds.stats(gtref, ocrref, w));
             addTextElement(body, "div", " ");
             addElement(body, alitab);
             numwords += wd[0]; // length (words) in gts
-            wdist += wd[2];    // word-based distance
+            wdist += wd[2]; // word-based distance
             bdist += gtv.distance(ocrv);
         }
-        //Summary table
+        // Summary table
         double cer = stats.cer();
         double wer = wdist / (double) numwords;
         double ber = bdist / (double) numwords;
-        String[][] summaryContent = {{"CER", String.format("%.2f", cer * 100)},
-            //   {"CER (with swaps)", String.format("%.2f", cerDL * 100)},
-            {"WER", String.format("%.2f", wer * 100)},
-            {"WER (order independent)", String.format("%.2f", ber * 100)}
+        String[][] summaryContent = {
+                { "CER", String.format("%.2f", cer * 100) },
+                // {"CER (with swaps)", String.format("%.2f", cerDL * 100)},
+                { "WER", String.format("%.2f", wer * 100) },
+                { "WER (order independent)", String.format("%.2f", ber * 100) }
         };
         addTable(summaryTab, summaryContent);
         // CharStatTable

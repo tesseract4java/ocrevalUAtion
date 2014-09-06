@@ -17,6 +17,8 @@
  */
 package eu.digitisation.text;
 
+import java.util.regex.Pattern;
+
 /**
  * Normalizes strings: collapse whitespace and use composed form (see
  * java.text.Normalizer.Form)
@@ -32,16 +34,18 @@ public class StringNormalizer {
     /**
      * Reduce whitespace (including line and paragraph separators)
      *
-     * @param s a string.
+     * @param s
+     *            a string.
      * @return The string with simple spaces between words.
      */
     public static String reduceWS(String s) {
-        return s.replaceAll("(\\p{Space}|\u2028|\u2029)+", " ")
-                .trim();
+        return s.replaceAll("-\n", "").replaceAll(
+                "(\\p{Space}|\u2028|\u2029)+", " ").trim();
     }
 
     /**
-     * @param s a string
+     * @param s
+     *            a string
      * @return the canonical representation of the string.
      */
     public static String composed(String s) {
@@ -49,16 +53,18 @@ public class StringNormalizer {
     }
 
     /**
-     * @param s a string
+     * @param s
+     *            a string
      * @return the canonical representation of the string with normalized
-     * compatible characters.
+     *         compatible characters.
      */
     public static String compatible(String s) {
         return java.text.Normalizer.normalize(s, compatible);
     }
 
     /**
-     * @param s a string
+     * @param s
+     *            a string
      * @return the string with all diacritics removed.
      */
     public static String removeDiacritics(String s) {
@@ -67,7 +73,8 @@ public class StringNormalizer {
     }
 
     /**
-     * @param s a string
+     * @param s
+     *            a string
      * @return the string with all punctuation symbols removed.
      */
     public static String removePunctuation(String s) {
@@ -75,9 +82,10 @@ public class StringNormalizer {
     }
 
     /**
-     * @param s a string
+     * @param s
+     *            a string
      * @return the string with leading and trailing whitespace and punctuation
-     * symbols removed.
+     *         symbols removed.
      */
     public static String trim(String s) {
         return s.replaceAll("^(\\p{P}|\\p{Space})+", "")
@@ -86,10 +94,14 @@ public class StringNormalizer {
 
     /**
      *
-     * @param s the input string
-     * @param ignoreCase true if case is irrelevant
-     * @param ignoreDiacritics true if diacritics are irrelevant
-     * @param ignorePunctuation true if punctuation is irrelevant
+     * @param s
+     *            the input string
+     * @param ignoreCase
+     *            true if case is irrelevant
+     * @param ignoreDiacritics
+     *            true if diacritics are irrelevant
+     * @param ignorePunctuation
+     *            true if punctuation is irrelevant
      * @return the canonical representation for comparison
      */
     public static String canonical(String s,
@@ -115,7 +127,8 @@ public class StringNormalizer {
      * Remove everything except for letters (with diacritics), numbers and
      * spaces
      *
-     * @param s a string
+     * @param s
+     *            a string
      * @return the string with only letters, numbers, spaces and diacritics.
      */
     public static String strip(String s) {
@@ -123,7 +136,8 @@ public class StringNormalizer {
     }
 
     /**
-     * @param s a string
+     * @param s
+     *            a string
      * @return the string with characters <, >, &, " escaped
      */
     public static String encode(String s) {
