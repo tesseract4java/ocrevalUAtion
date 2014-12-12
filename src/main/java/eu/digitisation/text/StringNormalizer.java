@@ -17,8 +17,6 @@
  */
 package eu.digitisation.text;
 
-import java.util.regex.Pattern;
-
 /**
  * Normalizes strings: collapse whitespace and use composed form (see
  * java.text.Normalizer.Form)
