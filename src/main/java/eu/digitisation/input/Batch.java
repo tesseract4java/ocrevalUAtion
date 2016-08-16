@@ -41,7 +41,7 @@ public class Batch {
 
     /**
      * Create a a batch of file pairs
-     * 
+     *
      * @param dir1
      *            the first directory of files
      * @param dir2
@@ -78,16 +78,16 @@ public class Batch {
     }
 
     /**
-     * 
+     *
      * @param transcriptions
      * @param ocrDir
      * @throws IOException
-     * 
+     *
      * @author Paul Vorbach
      */
     public Batch(Iterable<Path> transcriptions, Path ocrDir) throws IOException {
-        final ArrayList<File> fs1 = new ArrayList<>();
-        final ArrayList<File> fs2 = new ArrayList<>();
+        final ArrayList<File> fs1 = new ArrayList<File>();
+        final ArrayList<File> fs2 = new ArrayList<File>();
 
         for (final Path transcription : transcriptions) {
             fs1.add(transcription.toFile());
