@@ -97,31 +97,37 @@ public class CharStatTable extends BiCounter<Character, EdOp> {
         // features
         table.setAttribute("border", "1");
         // header
-        builder.addTextElement(row, "td", "Character");
-        builder.addTextElement(row, "td", "Character name");
-        builder.addTextElement(row, "td", "Hex code");
-        builder.addTextElement(row, "td", "Total");
-        builder.addTextElement(row, "td", "Spurious");
-        builder.addTextElement(row, "td", "Confused");
-        builder.addTextElement(row, "td", "Lost");
-        builder.addTextElement(row, "td", "Error rate");
+        builder.addTextElement(row, "th", "Character");
+        builder.addTextElement(row, "th", "Character name");
+        builder.addTextElement(row, "th", "Hex code");
+        builder.addTextElement(row, "th", "Total");
+        builder.addTextElement(row, "th", "Keep");
+        builder.addTextElement(row, "th", "Insert");
+        builder.addTextElement(row, "th", "Substitute");
+        builder.addTextElement(row, "th", "Delete");
+        builder.addTextElement(row, "th", "Error rate (%)");
+        builder.addTextElement(row, "th", "Accuracy (%)");
 
         // content
         for (Character c : leftKeySet()) {
             int spu = value(c, EdOp.INSERT);
             int sub = value(c, EdOp.SUBSTITUTE);
             int add = value(c, EdOp.DELETE);
-            int tot = value(c, EdOp.KEEP) + sub + add;
+            int kep = value(c, EdOp.KEEP);
+            int tot = kep + sub + add;
             double rate = (spu + sub + add) / (double) tot * 100;
+            double accuracy = (tot - (spu + sub + add)) / (double) tot * 100;
             row = builder.addElement("tr");
             builder.addTextElement(row, "td", c.toString());
             builder.addTextElement(row, "td", Character.getName((int) c));
             builder.addTextElement(row, "td", Integer.toHexString(c));
-            builder.addTextElement(row, "td", "" + tot);
-            builder.addTextElement(row, "td", "" + spu);
-            builder.addTextElement(row, "td", "" + sub);
-            builder.addTextElement(row, "td", "" + add);
-            builder.addTextElement(row, "td", String.format("%.4f", rate));
+            builder.addTextElement(row, "td", String.valueOf(tot));
+            builder.addTextElement(row, "td", String.valueOf(kep));
+            builder.addTextElement(row, "td", String.valueOf(spu));
+            builder.addTextElement(row, "td", String.valueOf(sub));
+            builder.addTextElement(row, "td", String.valueOf(add));
+            builder.addTextElement(row, "td", String.format("%.2f", rate));
+            builder.addTextElement(row, "td", String.format("%.2f", accuracy));
         }
         return builder.document().getDocumentElement();
     }
@@ -142,28 +148,34 @@ public class CharStatTable extends BiCounter<Character, EdOp> {
         StringBuilder builder = new StringBuilder();
 
         builder.append("Character")
+                .append(fieldSeparator).append("Hex code")
                 .append(fieldSeparator).append("Total")
-                .append(fieldSeparator).append("Spurious")
-                .append(fieldSeparator).append("Confused")
-                .append(fieldSeparator).append("Lost")
-                .append(fieldSeparator).append("Error rate");
+                .append(fieldSeparator).append("Keep")
+                .append(fieldSeparator).append("Insert")
+                .append(fieldSeparator).append("Substitute")
+                .append(fieldSeparator).append("Delete")
+                .append(fieldSeparator).append("Error rate (%)")
+                .append(fieldSeparator).append("Accuracy (%)");
 
         for (Character c : leftKeySet()) {
             int spu = value(c, EdOp.INSERT);
             int sub = value(c, EdOp.SUBSTITUTE);
             int add = value(c, EdOp.DELETE);
-            int tot = value(c, EdOp.KEEP) + sub + add;
+            int kep = value(c, EdOp.KEEP);
+            int tot = kep + sub + add;
             double rate = (spu + sub + add) / (double) tot * 100;
+            double accuracy = (tot - (spu + sub + add)) / (double) tot * 100;
             builder.append(recordSeparator);
             builder.append(c)
-                    .append("[")
-                    .append(Integer.toHexString(c))
-                    .append("]")
+                    .append(fieldSeparator).append(Integer.toHexString(c))
                     .append(fieldSeparator).append(tot)
+                    .append(fieldSeparator).append(kep)
                     .append(fieldSeparator).append(spu)
                     .append(fieldSeparator).append(sub)
                     .append(fieldSeparator).append(add)
-                    .append(fieldSeparator).append(String.format("%.2f", rate));
+                    .append(fieldSeparator).append(String.format("%.2f", rate))
+                    .append(fieldSeparator).append(
+                            String.format("%.2f", accuracy));
         }
         return builder;
     }
@@ -189,5 +201,23 @@ public class CharStatTable extends BiCounter<Character, EdOp> {
         }
 
         return (spu + sub + add) / (double) tot;
+    }
+
+    public double accuracy() {
+        int spu = 0;
+        int sub = 0;
+        int add = 0;
+        int tot = 0;
+
+        for (Character c : leftKeySet()) {
+            spu += value(c, EdOp.INSERT);
+            sub += value(c, EdOp.SUBSTITUTE);
+            add += value(c, EdOp.DELETE);
+            tot += value(c, EdOp.KEEP)
+                    + value(c, EdOp.SUBSTITUTE)
+                    + value(c, EdOp.DELETE);
+        }
+
+        return (tot - (spu + sub + add)) / (double) tot;
     }
 }

@@ -49,6 +49,7 @@ public class Report extends DocumentBuilder {
 
     Element head;
     Element body;
+    private CharStatTable stats;
 
     /**
      * Initial settings: create an empty HTML document
@@ -97,7 +98,7 @@ public class Report extends DocumentBuilder {
 
         File swfile = pars.swfile.getValue();
         EdOpWeight w = new OcrOpWeight(pars);
-        CharStatTable stats = new CharStatTable();
+        stats = new CharStatTable();
         CharFilter filter;
 
         // optional eqfile
@@ -158,18 +159,24 @@ public class Report extends DocumentBuilder {
         }
         // Summary table
         double cer = stats.cer();
+        double accuracy = stats.accuracy();
         double wer = wdist / (double) numwords;
         double ber = bdist / (double) numwords;
         String[][] summaryContent = {
-                { "CER", String.format("%.2f", cer * 100) },
+                { "CER %", String.format("%.2f", cer * 100) },
                 // {"CER (with swaps)", String.format("%.2f", cerDL * 100)},
-                { "WER", String.format("%.2f", wer * 100) },
-                { "WER (order independent)", String.format("%.2f", ber * 100) }
+                { "WER %", String.format("%.2f", wer * 100) },
+                { "WER % (order independent)", String.format("%.2f", ber * 100) },
+                { "Character accuracy %", String.format("%.2f", accuracy * 100) }
         };
         addTable(summaryTab, summaryContent);
         // CharStatTable
         addTextElement(body, "h2", "Error rate per character and type");
         addElement(body, stats.asTable());
+    }
+
+    public CharStatTable getStats() {
+        return stats;
     }
 
     public static void main(String[] args) {
